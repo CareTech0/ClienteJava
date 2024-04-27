@@ -1,8 +1,7 @@
-package repository;
+package infraestrutura;
 
 import com.github.britooo.looca.api.core.Looca;
 import com.github.britooo.looca.api.group.janelas.Janela;
-import com.github.britooo.looca.api.group.processos.Processo;
 import com.github.britooo.looca.api.group.processos.ProcessoGrupo;
 
 import java.util.List;

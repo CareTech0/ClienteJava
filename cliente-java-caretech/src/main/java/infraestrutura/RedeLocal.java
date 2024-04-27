@@ -1,7 +1,6 @@
-package repository;
+package infraestrutura;
 
 import com.github.britooo.looca.api.core.Looca;
-import com.github.britooo.looca.api.group.rede.Rede;
 
 public class RedeLocal {
 
