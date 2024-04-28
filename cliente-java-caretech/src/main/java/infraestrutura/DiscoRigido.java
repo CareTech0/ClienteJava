@@ -10,10 +10,12 @@ public class DiscoRigido {
 
     private List<Double> totalDeEspacoNosDiscos;
     private List<Double> disponivel;
+    private List<Double> ocupado;
 
     public DiscoRigido(){
         totalDeEspacoNosDiscos = new ArrayList<>();
         disponivel = new ArrayList<>();
+        ocupado = new ArrayList<>();
     }
 
     public List<Double> buscarTotalDeEspaco(){
@@ -33,4 +35,12 @@ public class DiscoRigido {
         }
         return disponivel;
     }
+
+    public List<Double> buscarEspacoOcupado(){
+        for (int i = 0; i < totalDeEspacoNosDiscos.size(); i++){
+            ocupado.add(totalDeEspacoNosDiscos.get(i) - disponivel.get(i));
+        }
+        return ocupado;
+    }
+
 }
