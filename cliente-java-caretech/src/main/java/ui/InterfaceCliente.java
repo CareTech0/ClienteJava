@@ -1,6 +1,8 @@
 package ui;
 
+import com.github.britooo.looca.api.core.Looca;
 import com.github.britooo.looca.api.group.janelas.Janela;
+import com.github.britooo.looca.api.group.sistema.Sistema;
 import com.profesorfalken.jpowershell.PowerShell;
 import com.profesorfalken.jpowershell.PowerShellResponse;
 import dao.Registros;
@@ -23,6 +25,8 @@ public class InterfaceCliente {
         Cpu cpu = new Cpu();
         MemoriaRam ram = new MemoriaRam();
         DiscoRigido ssd = new DiscoRigido();
+        Looca looca = new Looca();
+        Sistema sistema = looca.getSistema();
 
         do{
             System.out.println("--------------------------------------------------------");
@@ -49,7 +53,7 @@ public class InterfaceCliente {
         } while(!statusDaVerificacao.equals("Login Realizado com Sucesso!!!"));
 
         try {
-            System.out.println(sitesBloqueados.getSitesBloqueados().get(0).getNome());
+            System.out.println("Sistema operacional: " + sistema.getSistemaOperacional());
             while (true) {
 
                 //System.out.println("Ram em uso no momento: %.1f".formatted(ram.buscarUsoDeRam()));
@@ -75,10 +79,12 @@ public class InterfaceCliente {
                         if(listaProcessos.get(processo).getTitulo().toLowerCase().contains(listaSitesBloqueados.get(site).getNome().toLowerCase())){
                             System.out.println("O site está bloquado, portanto estamos encerrando o processo");
                             Long pidProcesso = listaProcessos.get(processo).getPid();
-                            PowerShellResponse response = PowerShell.executeSingleCommand("taskkill /PID %d\n".formatted(pidProcesso));
+                            if(sistema.getSistemaOperacional().equalsIgnoreCase("Windows")){
+                                PowerShellResponse response = PowerShell.executeSingleCommand("taskkill /PID %d\n".formatted(pidProcesso));
+                            }else{
+                                PowerShellResponse response = PowerShell.executeSingleCommand("kill %d\n".formatted(pidProcesso));
+                            }
                             break;
-                        }else {
-                            System.out.println("Nenhum site bloqueado encontrado");
                         }
                     }
                 }
