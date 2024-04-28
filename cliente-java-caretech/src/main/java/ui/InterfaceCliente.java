@@ -13,6 +13,8 @@ import infraestrutura.MemoriaRam;
 import infraestrutura.RedeLocal;
 import model.Computador;
 
+import java.io.BufferedReader;
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -89,12 +91,16 @@ public class InterfaceCliente {
                     }
                 }
 
+                Double usoRam = ram.buscarUsoDeRam();
+                Double usoCpu = cpu.buscarUsoCpu();
+                Double usoSsd = ssd.buscarEspacoOcupado().get(0);
+
                 Registros registros = new Registros();
                 registros.inserirRegistros(
-                    ram.buscarUsoDeRam(),
-                    cpu.buscarUsoCpu(),
+                    usoRam,
+                    usoCpu,
                     ram.buscarQtdProcessos(),
-                    ssd.buscarEspacoOcupado().get(0),
+                    usoSsd,
                     computador.getId_Computador()
                 );
                 System.out.println("Inserido com sucesso");

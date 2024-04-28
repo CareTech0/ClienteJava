@@ -59,7 +59,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>InterfaceCliente</mainClass>
+                            <mainClass>ui.InterfaceCliente</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
