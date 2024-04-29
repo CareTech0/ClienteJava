@@ -35,8 +35,8 @@ public class InterfaceCliente {
 
         if (Objects.equals(firstChar, "1")) {
             TestePing.main(new String[]{""});
-        } else {
-
+        }
+            
             do {
                 System.out.println("--------------------------------------------------------");
                 System.out.println("||||||||||||||||     Login no Client     |||||||||||||||");
@@ -119,4 +119,3 @@ public class InterfaceCliente {
             }
         }
     }
-}
