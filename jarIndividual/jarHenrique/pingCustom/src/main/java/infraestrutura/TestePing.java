@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 
 public class TestePing {
     public static void main(String[] args) {
-        String[] hosts = {"localhost", "google.com", "facebook.com"};
+        String[] hosts = {"localhost", "www.google.com", "www.facebook.com"};
 
         for (String host : hosts) {
             testarPing(host);
