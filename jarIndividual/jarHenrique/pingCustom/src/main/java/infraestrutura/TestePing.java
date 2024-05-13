@@ -8,22 +8,23 @@ public class TestePing {
         String[] hosts = {"localhost", "www.google.com", "www.facebook.com"};
 
         for (String host : hosts) {
-            testarPing(host);
+            testarPing(host, 5);
         }
     }
 
-    public static void testarPing(String host) {
+    public static void testarPing(String host, int numPacotes) {
         try {
-            Process processo = Runtime.getRuntime().exec("ping " + host);
-            BufferedReader leitor = new BufferedReader(new InputStreamReader(processo.getInputStream()));
+            ProcessBuilder builder = new ProcessBuilder("ping", "-c", Integer.toString(numPacotes), host);
+            Process processo = builder.start();
 
+            BufferedReader leitor = new BufferedReader(new InputStreamReader(processo.getInputStream()));
             String linha;
             while ((linha = leitor.readLine()) != null) {
                 System.out.println(linha);
             }
 
             int codigoSaida = processo.waitFor();
-            System.out.println("Comando ping para " + host + " finalizado com código de saída: " + codigoSaida);
+            System.out.println("Comando ping para " + host + " finalizado com código de saída: " + codigoSaida + "\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
