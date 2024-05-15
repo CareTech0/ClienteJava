@@ -25,6 +25,7 @@ public class MemoriaRam {
     public Double buscarTotalDeRam() {
         Looca looca = new Looca();
         totalRam = looca.getMemoria().getTotal() / (Math.pow(1024.0, 3));
+        totalRam = 8.0;
         return totalRam;
     }
 
