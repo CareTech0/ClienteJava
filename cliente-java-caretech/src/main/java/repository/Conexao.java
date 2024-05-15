@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class Conexao {
     private String bd = "caretech";
     private String user = "root";
-    private String pass = "urubu100";
+    private String pass = "";
     private JdbcTemplate conexaoDoBanco;
 
     public Conexao() {

@@ -10,12 +10,10 @@ import dao.SitesBloqueados;
 import infraestrutura.Cpu;
 import infraestrutura.DiscoRigido;
 import infraestrutura.MemoriaRam;
-import infraestrutura.RedeLocal;
 import model.Computador;
+import notificacoes.AutomacaoDeAlertasSlack;
 
-import java.io.BufferedReader;
-import java.io.Console;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Scanner;
 
@@ -29,6 +27,7 @@ public class InterfaceCliente {
         DiscoRigido ssd = new DiscoRigido();
         Looca looca = new Looca();
         Sistema sistema = looca.getSistema();
+        AutomacaoDeAlertasSlack notificacao = new AutomacaoDeAlertasSlack();
 
         do{
             System.out.println("--------------------------------------------------------");
@@ -104,6 +103,18 @@ public class InterfaceCliente {
                     computador.getId_Computador()
                 );
                 System.out.println("Inserido com sucesso");
+
+                //Envio de notificações ao Slack
+                if (usoCpu > 1.0) {
+                    notificacao.enviarAlertaSlack(String.format("Nível crítico de uso da CPU detectado: %.2f%%", usoCpu));
+                }
+
+                if (usoRam > 1.0) {
+                    notificacao.enviarAlertaSlack(String.format(
+                            "Memória RAM em estado crítico!\nTotal de memória RAM da máquina: %.2f GB\nMemória utilizada: %.2f GB\nQuantidade de processos em aberto: %d",
+                            ram.buscarTotalDeRam(), usoRam, ram.buscarQtdProcessos()));
+                }
+
                 Thread.sleep(3000);
         }
     }
