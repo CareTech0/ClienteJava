@@ -13,7 +13,6 @@ import infraestrutura.MemoriaRam;
 import model.Computador;
 import notificacoes.AutomacaoDeAlertasSlack;
 
-
 import java.util.List;
 import java.util.Scanner;
 
@@ -27,14 +26,15 @@ public class InterfaceCliente {
         DiscoRigido ssd = new DiscoRigido();
         Looca looca = new Looca();
         Sistema sistema = looca.getSistema();
-        AutomacaoDeAlertasSlack notificacao = new AutomacaoDeAlertasSlack();
+        AutomacaoDeAlertasSlack alertasSlack = new AutomacaoDeAlertasSlack();
 
-        do{
+        Scanner input = new Scanner(System.in);
+
+        do {
             System.out.println("--------------------------------------------------------");
             System.out.println("||||||||||||||||     Login no Client     |||||||||||||||");
             System.out.println("--------------------------------------------------------");
 
-            Scanner input = new Scanner(System.in);
             System.out.println("User: ");
             String user = input.nextLine();
             System.out.println("Senha: ");
@@ -42,7 +42,7 @@ public class InterfaceCliente {
 
             List<Computador> computadores = computador.autenticadorComputador(user, senha);
 
-            if (computadores.size() == 1){
+            if (computadores.size() == 1) {
                 statusDaVerificacao = "Login Realizado com Sucesso!!!";
                 sitesBloqueados.setFkEmpresa(computadores.get(0).getFk_empresa());
                 computador.setId_Computador(computadores.get(0).getId_Computador());
@@ -51,39 +51,27 @@ public class InterfaceCliente {
             }
 
             System.out.println(statusDaVerificacao);
-        } while(!statusDaVerificacao.equals("Login Realizado com Sucesso!!!"));
+        } while (!statusDaVerificacao.equals("Login Realizado com Sucesso!!!"));
 
         try {
             System.out.println("Sistema operacional: " + sistema.getSistemaOperacional());
             while (true) {
-
-                //System.out.println("Ram em uso no momento: %.1f".formatted(ram.buscarUsoDeRam()));
-
-                //System.out.println("Total de espaço nos discos rigidos: " + ssd.buscarTotalDeEspaco());
-                //System.out.println("Espeço disponível nos discos rígidos: " + ssd.buscarEspacoLivre());
                 ssd.buscarTotalDeEspaco();
                 ssd.buscarEspacoLivre();
-
-
-                //System.out.println("Informações da CPU: ");
-                //System.out.println(cpu.buscarUsoCpu());
-                //System.out.println("Teste comando no terminal");
-
-                //System.out.println("Lista de processos: ");
-                //System.out.println(ram.buscarProcessos());
 
                 List<Janela> listaProcessos = ram.buscarProcessos();
                 List<SitesBloqueados> listaSitesBloqueados = sitesBloqueados.getSitesBloqueados();
 
-                for(int processo = 0; processo < listaProcessos.size(); processo++){
-                    for(int site = 0; site < listaSitesBloqueados.size(); site++){
-                        if(listaProcessos.get(processo).getTitulo().toLowerCase().contains(listaSitesBloqueados.get(site).getNome().toLowerCase())){
-                            System.out.println("O site está bloquado, portanto estamos encerrando o processo");
-                            Long pidProcesso = listaProcessos.get(processo).getPid();
-                            if(sistema.getSistemaOperacional().equalsIgnoreCase("Windows")){
-                                PowerShellResponse response = PowerShell.executeSingleCommand("taskkill /PID %d\n".formatted(pidProcesso));
-                            }else{
-                                PowerShellResponse response = PowerShell.executeSingleCommand("kill %d\n".formatted(pidProcesso));
+                for (Janela processo : listaProcessos) {
+                    for (SitesBloqueados site : listaSitesBloqueados) {
+                        if (processo.getTitulo().toLowerCase().contains(site.getNome().toLowerCase())) {
+                            System.out.println("O site está bloqueado, portanto estamos encerrando o processo");
+                            Long pidProcesso = processo.getPid();
+                            PowerShellResponse response;
+                            if (sistema.getSistemaOperacional().equalsIgnoreCase("Windows")) {
+                                response = PowerShell.executeSingleCommand("taskkill /PID %d".formatted(pidProcesso));
+                            } else {
+                                response = PowerShell.executeSingleCommand("kill %d".formatted(pidProcesso));
                             }
                             break;
                         }
@@ -96,30 +84,31 @@ public class InterfaceCliente {
 
                 Registros registros = new Registros();
                 registros.inserirRegistros(
-                    usoRam,
-                    usoCpu,
-                    ram.buscarQtdProcessos(),
-                    usoSsd,
-                    computador.getId_Computador()
+                        usoRam,
+                        usoCpu,
+                        ram.buscarQtdProcessos(),
+                        usoSsd,
+                        computador.getId_Computador()
                 );
                 System.out.println("Inserido com sucesso");
 
-                //Envio de notificações ao Slack
-                if (usoCpu > 1.0) {
-                    notificacao.enviarAlertaSlack(String.format("Nível crítico de uso da CPU detectado: %.2f%%", usoCpu));
-                }
-
-                if (usoRam > 1.0) {
-                    notificacao.enviarAlertaSlack(String.format(
-                            "Memória RAM em estado crítico!\nTotal de memória RAM da máquina: %.2f GB\nMemória utilizada: %.2f GB\nQuantidade de processos em aberto: %d",
-                            ram.buscarTotalDeRam(), usoRam, ram.buscarQtdProcessos()));
+                // Verifica se deve enviar alerta ao Slack
+                String alertaMessage = verificarUso(usoCpu, usoRam, ssd.buscarEspacoOcupado());
+                if (alertaMessage != null) {
+                    alertasSlack.enviarAlertaSlack(alertaMessage);
                 }
 
                 Thread.sleep(3000);
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
-    catch (InterruptedException e) {
-        throw new RuntimeException(e);
-    }
+
+    private static String verificarUso(Double usoCpu, Double usoRam, List<Double> usoDisco) {
+        if (usoCpu > 80.0 || usoRam > 80.0 || usoDisco.get(0) > 80.0 || usoDisco.get(1) > 80.0) {
+            return "Nova ocorrência, acesse o painel de monitoramento para mais informações";
+        }
+        return null;
     }
 }
