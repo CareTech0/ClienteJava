@@ -10,7 +10,7 @@ import dao.SitesBloqueados;
 import infraestrutura.Cpu;
 import infraestrutura.DiscoRigido;
 import infraestrutura.MemoriaRam;
-import model.Computador;
+import model.*;
 import notificacoes.AutomacaoDeAlertasSlack;
 
 import java.util.List;
@@ -20,13 +20,23 @@ public class InterfaceCliente {
     public static void main(String[] args) {
         String statusDaVerificacao = "";
         SitesBloqueados sitesBloqueados = new SitesBloqueados();
+
+        //Models
         Computador computador = new Computador();
+        CpuModel cpuModel = new CpuModel();
+        DiscoModel discoModel = new DiscoModel();
+        RamModel ramModel = new RamModel();
+
+        //Infraestrutura
         Cpu cpu = new Cpu();
         MemoriaRam ram = new MemoriaRam();
         DiscoRigido ssd = new DiscoRigido();
         Looca looca = new Looca();
         Sistema sistema = looca.getSistema();
         AutomacaoDeAlertasSlack alertasSlack = new AutomacaoDeAlertasSlack();
+
+        //Dao
+        Registros registros = new Registros();
 
         Scanner input = new Scanner(System.in);
 
@@ -44,8 +54,51 @@ public class InterfaceCliente {
 
             if (computadores.size() == 1) {
                 statusDaVerificacao = "Login Realizado com Sucesso!!!";
+
                 sitesBloqueados.setFkEmpresa(computadores.get(0).getFk_empresa());
                 computador.setId_Computador(computadores.get(0).getId_Computador());
+
+                List<RamModel> ramdb = ramModel.autenticarHardware(computador.getId_Computador());
+                List<DiscoModel> discosdb = discoModel.autenticarHardware(computador.getId_Computador());
+                List<CpuModel> cpudb = cpuModel.autenticarHardware(computador.getId_Computador());
+
+                if (ramdb.isEmpty()){
+                    ramModel.inserirHardware(computador.getId_Computador(), ram.buscarTotalDeRam());
+                    ramdb = ramModel.autenticarHardware(computador.getId_Computador());
+                }
+
+                ramModel.setId_hardware(ramdb.get(0).getId_hardware());
+                ramModel.setNome_hardware(ramdb.get(0).getNome_hardware());
+                ramModel.setCapacidade_total(ramdb.get(0).getCapacidade_total());
+                ramModel.setFk_computador(ramdb.get(0).getFk_computador());
+
+                if (discosdb.isEmpty()){
+                    for (Double ssdFor: ssd.buscarTotalDeEspaco()){
+                        discoModel.inserirHardware(computador.getId_Computador(), ssdFor);
+                    }
+
+                    discosdb = discoModel.autenticarHardware(computador.getId_Computador());
+                }
+
+                for (Hardware discoFor: discosdb){
+                    discoModel.setId_hardware(discoFor.getId_hardware());
+                    discoModel.setCapacidade_total(discoFor.getCapacidade_total());
+                    discoModel.setNome_hardware(discoFor.getNome_hardware());
+                    discoModel.setFk_computador(discoFor.getFk_computador());
+                    computador.adicionarDisco(discoModel);
+                }
+
+
+                if (cpudb.isEmpty()){
+                    cpuModel.inserirHardware(computador.getId_Computador(), cpu.buscarUsoCpu());
+                    cpudb = cpuModel.autenticarHardware(computador.getId_Computador());
+                }
+
+                cpuModel.setId_hardware(cpudb.get(0).getId_hardware());
+                cpuModel.setFk_computador(cpudb.get(0).getFk_computador());
+                cpuModel.setCapacidade_total(cpudb.get(0).getCapacidade_total());
+                cpuModel.setNome_hardware(cpudb.get(0).getNome_hardware());
+
             } else {
                 statusDaVerificacao = "Login ou senha inválidos!!!";
             }
@@ -80,19 +133,20 @@ public class InterfaceCliente {
 
                 Double usoRam = ram.buscarUsoDeRam();
                 Double usoCpu = cpu.buscarUsoCpu();
-                Double usoSsd = ssd.buscarEspacoOcupado().get(0);
+                List<Double> usoSsd = ssd.buscarEspacoOcupado();
 
-                Registros registros = new Registros();
-                registros.inserirRegistros(
-                        usoRam,
-                        usoCpu,
-                        ram.buscarQtdProcessos(),
-                        usoSsd,
-                        computador.getId_Computador()
-                );
+                registros.inserirCpu(usoCpu, cpuModel.getId_hardware());
+                registros.inserirRam(usoRam, ram.buscarQtdProcessos(), ramModel.getId_hardware());
+
+                Integer i = 0;
+                for (DiscoModel discosModelLista: computador.getListaDiscos()){
+                    registros.inserirDisco(usoSsd.get(i), discosModelLista.getId_hardware());
+                    i++;
+                }
+
                 System.out.println("Inserido com sucesso");
 
-                // Verifica se deve enviar alerta ao Slack
+                //Verifica se deve enviar alerta ao Slack
                 String alertaMessage = verificarUso(usoCpu, usoRam, ssd.buscarEspacoOcupado());
                 if (alertaMessage != null) {
                     alertasSlack.enviarAlertaSlack(alertaMessage);

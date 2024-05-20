@@ -4,36 +4,43 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import repository.Conexao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Computador {
     private Integer id_Computador;
-    private String departamento;
+    private String estacao_de_trabalho;
     private String login;
     private String senha;
-    private String chave_acesso;
     private Integer fk_empresa;
+    private ArrayList<DiscoModel> listaDiscos = new ArrayList<DiscoModel>();
+
+    public Computador(Integer id_Computador, String estacao_de_trabalho, String login, String senha, Integer fk_empresa, ArrayList<DiscoModel> listaDiscos) {
+        this.id_Computador = id_Computador;
+        this.estacao_de_trabalho = estacao_de_trabalho;
+        this.login = login;
+        this.senha = senha;
+        this.fk_empresa = fk_empresa;
+        this.listaDiscos = listaDiscos;
+    }
 
     public Computador() {
 
     }
 
-    public Computador(Integer id_Computador, String departamento, String login, String senha, String chave_acesso, Integer fk_empresa) {
-        this.id_Computador = id_Computador;
-        this.departamento = departamento;
-        this.login = login;
-        this.senha = senha;
-        this.chave_acesso = chave_acesso;
-        this.fk_empresa = fk_empresa;
+    public void adicionarDisco(DiscoModel discoModel){
+        listaDiscos.add(discoModel);
     }
+
+
 
     public List<Computador> autenticadorComputador(String login, String senha){
         Conexao conexao = new Conexao();
         JdbcTemplate con = conexao.getConexaoDoBanco();
 
         List<Computador> computadores = con.query(
-                "SELECT * FROM computador WHERE login = '%s' AND senha = '%s'".formatted(login, senha),
-                new BeanPropertyRowMapper<>(Computador.class)
+            "SELECT * FROM computador WHERE login = '%s' AND senha = '%s'".formatted(login, senha),
+            new BeanPropertyRowMapper<>(Computador.class)
         );
 
         System.out.println("Inserindo...");
@@ -49,12 +56,12 @@ public class Computador {
         this.id_Computador = id_Computador;
     }
 
-    public String getDepartamento() {
-        return departamento;
+    public String getEstacao_de_trabalho() {
+        return estacao_de_trabalho;
     }
 
-    public void setDepartamento(String departamento) {
-        this.departamento = departamento;
+    public void setEstacao_de_trabalho(String estacao_de_trabalho) {
+        this.estacao_de_trabalho = estacao_de_trabalho;
     }
 
     public String getLogin() {
@@ -73,14 +80,6 @@ public class Computador {
         this.senha = senha;
     }
 
-    public String getChave_acesso() {
-        return chave_acesso;
-    }
-
-    public void setChave_acesso(String chave_acesso) {
-        this.chave_acesso = chave_acesso;
-    }
-
     public Integer getFk_empresa() {
         return fk_empresa;
     }
@@ -89,14 +88,21 @@ public class Computador {
         this.fk_empresa = fk_empresa;
     }
 
+    public List<DiscoModel> getListaDiscos() {
+        return listaDiscos;
+    }
+
+    public void setListaDiscos(ArrayList<DiscoModel> listaDiscos) {
+        this.listaDiscos = listaDiscos;
+    }
+
     @Override
     public String toString() {
         return "Computador{" +
                 "id_Computador=" + id_Computador +
-                ", departamento='" + departamento + '\'' +
+                ", estacao_de_trabalho='" + estacao_de_trabalho + '\'' +
                 ", login='" + login + '\'' +
                 ", senha='" + senha + '\'' +
-                ", chave_acesso='" + chave_acesso + '\'' +
                 ", fk_empresa=" + fk_empresa +
                 '}';
     }
