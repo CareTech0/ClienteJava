@@ -7,8 +7,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="cliente-java-caretech" />
-        <module name="cliente-java-caretech (1)" />
         <module name="pingCustom" />
+        <module name="cliente-java-caretech (1)" />
+        <module name="cliente-java-caretech (2)" />
       </profile>
     </annotationProcessing>
   </component>
