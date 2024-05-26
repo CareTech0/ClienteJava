@@ -7,11 +7,11 @@ import repository.Conexao;
 import java.util.List;
 
 public class RamModel extends Hardware {
-    public RamModel(Integer id_hardware, String nome_hardware, Double capacidade_total, Integer fk_computador) {
-        super(id_hardware, nome_hardware, capacidade_total, fk_computador);
+    public RamModel(Integer id_hardware, String nome_hardware, Double capacidade_total, Double min, Double max, Integer fk_computador) {
+        super(id_hardware, nome_hardware, capacidade_total, min, max, fk_computador);
     }
 
-   public RamModel(){ super(); }
+    public RamModel(){ super(); }
 
     @Override
     public <T> T autenticarHardware(Integer fk_computador) {

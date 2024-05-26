@@ -11,8 +11,8 @@ public class DiscoModel extends Hardware{
 
     public DiscoModel() { super(); }
 
-    public DiscoModel(Integer id_hardware, String nome_hardware, Double capacidade_total, Integer fk_computador) {
-        super(id_hardware, nome_hardware, capacidade_total, fk_computador);
+    public DiscoModel(Integer id_hardware, String nome_hardware, Double capacidade_total, Double min, Double max, Integer fk_computador) {
+        super(id_hardware, nome_hardware, capacidade_total, min, max, fk_computador);
     }
 
     @Override
@@ -35,6 +35,6 @@ public class DiscoModel extends Hardware{
 
         capacidadeTotal.toString().replace(',', '.');
 
-        con.execute("INSERT INTO hardware (nome_hardware, capacidade_total, fk_computador) VALUES ('disco', %s, %s)".formatted(capacidadeTotal, fkComputador));
+        con.execute("INSERT INTO hardware (nome_hardware, capacidade_total, fk_computador) VALUES ('disco', %s, %s, %d)".formatted(capacidadeTotal, fkComputador));
     }
 }

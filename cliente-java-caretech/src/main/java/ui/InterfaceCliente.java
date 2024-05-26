@@ -135,12 +135,12 @@ public class InterfaceCliente {
                 Double usoCpu = cpu.buscarUsoCpu();
                 List<Double> usoSsd = ssd.buscarEspacoOcupado();
 
-                registros.inserirCpu(usoCpu, cpuModel.getId_hardware());
-                registros.inserirRam(usoRam, ram.buscarQtdProcessos(), ramModel.getId_hardware());
+                registros.inserirCpu(usoCpu, cpuModel.getId_hardware(), computador.getId_Computador());
+                registros.inserirRam(usoRam, ram.buscarQtdProcessos(), ramModel.getId_hardware(), computador.getId_Computador());
 
                 Integer i = 0;
                 for (DiscoModel discosModelLista: computador.getListaDiscos()){
-                    registros.inserirDisco(usoSsd.get(i), discosModelLista.getId_hardware());
+                    registros.inserirDisco(usoSsd.get(i), discosModelLista.getId_hardware(), computador.getId_Computador());
                     i++;
                 }
 

@@ -3,8 +3,6 @@ package dao;
 import org.springframework.jdbc.core.JdbcTemplate;
 import repository.Conexao;
 
-import java.util.Locale;
-
 public class Registros {
     Conexao conexao = new Conexao();
     JdbcTemplate con = conexao.getConexaoDoBanco();
@@ -26,22 +24,22 @@ public class Registros {
 
 
 
-    public void inserirDisco(Double usoDisco, Integer fkHardware){
+    public void inserirDisco(Double usoDisco, Integer fkHardware, Integer idComputador){
         String disco = usoDisco.toString().replace(',', '.');
 
-        con.execute("INSERT INTO registros (uso_capacidade, fk_hardware) VALUES (%s, %d)".formatted(disco, fkHardware));
+        con.execute("INSERT INTO registros (uso_capacidade, fk_hardware, fk_computador) VALUES (%s, %d, %d)".formatted(disco, fkHardware, idComputador));
     }
 
-    public void inserirCpu(Double usoCpu, Integer fkHardware){
+    public void inserirCpu(Double usoCpu, Integer fkHardware, Integer idComputador){
         String cpu = usoCpu.toString().replace(',', '.');
 
-        con.execute("INSERT INTO registros (uso_capacidade, fk_hardware) VALUES (%s, %d)".formatted(cpu, fkHardware));
+        con.execute("INSERT INTO registros (uso_capacidade, fk_hardware, fk_computador) VALUES (%s, %d, %d)".formatted(cpu, fkHardware, idComputador));
     }
 
-    public void inserirRam(Double usoRam, Integer qtdDeProcessos, Integer fkHardware){
+    public void inserirRam(Double usoRam, Integer qtdDeProcessos, Integer fkHardware, Integer idComputador){
         String ram = usoRam.toString().replace(',', '.');
 
-        con.execute("INSERT INTO registros (uso_capacidade, qtd_processos, fk_hardware) VALUES (%s, %d, %d)".formatted(ram, qtdDeProcessos, fkHardware));
+        con.execute("INSERT INTO registros (uso_capacidade, qtd_processos, fk_hardware, fk_computador) VALUES (%s, %d, %d, %d)".formatted(ram, qtdDeProcessos, fkHardware, idComputador));
     }
 
 }
