@@ -3,6 +3,7 @@ package model;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import repository.Conexao;
+import repository.ConexaoSqlServer;
 
 import java.util.List;
 
@@ -16,9 +17,15 @@ public class CpuModel extends Hardware{
     }
 
     @Override
-    public <T> T autenticarHardware(Integer fk_computador) {
-        Conexao conexao = new Conexao();
-        JdbcTemplate con = conexao.getConexaoDoBanco();
+    public <T> T autenticarHardware(Integer fk_computador, String banco) {
+
+        JdbcTemplate con;
+        if(banco.equalsIgnoreCase("sqlserver")){
+            con = ConexaoSqlServer.conexaoSqlServer;
+        }else{
+            Conexao conexao = new Conexao();
+            con = conexao.getConexaoDoBanco();
+        }
 
         List<CpuModel> cpu = con.query(
                 "SELECT * FROM hardware WHERE nome_hardware = 'cpu' AND fk_computador = %s".formatted(fk_computador),
@@ -29,9 +36,14 @@ public class CpuModel extends Hardware{
     }
 
     @Override
-    public void inserirHardware(Integer fkComputador, Double capacidadeTotal) {
-        Conexao conexao = new Conexao();
-        JdbcTemplate con = conexao.getConexaoDoBanco();
+    public void inserirHardware(Integer fkComputador, Double capacidadeTotal, String banco) {
+        JdbcTemplate con;
+        if(banco.equalsIgnoreCase("sqlserver")){
+            con = ConexaoSqlServer.conexaoSqlServer;
+        } else {
+            Conexao conexao = new Conexao();
+            con = conexao.getConexaoDoBanco();
+        }
         capacidadeTotal.toString().replace(',', '.');
 
         con.execute("INSERT INTO hardware (nome_hardware, capacidade_total, fk_computador) VALUES ('cpu', %s, %s)".formatted(capacidadeTotal, fkComputador));

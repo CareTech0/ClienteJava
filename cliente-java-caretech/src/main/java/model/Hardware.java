@@ -23,9 +23,9 @@ public abstract class Hardware {
 
     }
 
-    abstract public <T> T autenticarHardware(Integer fk_computador);
+    abstract public <T> T autenticarHardware(Integer fk_computador, String banco);
 
-    abstract public void inserirHardware(Integer fkComputador, Double capacidadeTotal);
+    abstract public void inserirHardware(Integer fkComputador, Double capacidadeTotal, String banco);
 
     public Integer getId_hardware() {
         return id_hardware;
