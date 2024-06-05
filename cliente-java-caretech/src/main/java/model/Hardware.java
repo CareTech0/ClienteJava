@@ -6,16 +6,13 @@ public abstract class Hardware {
     private Integer id_hardware;
     private String nome_hardware;
     private Double capacidade_total;
-    private Double min;
-    private Double max;
+
     private Integer fk_computador;
 
     public Hardware(Integer id_hardware, String nome_hardware, Double capacidade_total, Double min, Double max, Integer fk_computador) {
         this.id_hardware = id_hardware;
         this.nome_hardware = nome_hardware;
         this.capacidade_total = capacidade_total;
-        this.min = min;
-        this.max = max;
         this.fk_computador = fk_computador;
     }
 
@@ -60,21 +57,6 @@ public abstract class Hardware {
     }
 
 
-    public Double getMin() {
-        return min;
-    }
-
-    public void setMin(Double min) {
-        this.min = min;
-    }
-
-    public Double getMax() {
-        return max;
-    }
-
-    public void setMax(Double max) {
-        this.max = max;
-    }
 
     @Override
     public String toString() {

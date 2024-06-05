@@ -15,7 +15,6 @@ public class Conexao {
     public Conexao() {
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        System.out.println(ambiente);
         if(ambiente == null){
             dataSource.setUrl("jdbc:mysql://localhost:3306/caretech");
             dataSource.setUsername("root");
