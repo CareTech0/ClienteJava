@@ -114,7 +114,7 @@ public class InterfaceCliente {
                     discoModelMysql.setCapacidade_total(discoFor.getCapacidade_total());
                     discoModelMysql.setNome_hardware(discoFor.getNome_hardware());
                     discoModelMysql.setFk_computador(discoFor.getFk_computador());
-                    computadorMySql.adicionarDisco(discoModel);
+                    computadorMySql.adicionarDisco(discoModelMysql);
                 }
 
                 for (Hardware discoFor : discosdb) {
@@ -152,6 +152,8 @@ public class InterfaceCliente {
         } while (!statusDaVerificacao.equals("Login Realizado com Sucesso!!!"));
 
         try {
+            System.out.println("Velocidade de rede: ");
+
             System.out.println("Sistema operacional: " + sistema.getSistemaOperacional());
             while (true) {
                 ssd.buscarTotalDeEspaco();
