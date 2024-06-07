@@ -3,6 +3,7 @@ package model;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import repository.Conexao;
+import repository.ConexaoSqlServer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +35,14 @@ public class Computador {
 
 
 
-    public List<Computador> autenticadorComputador(String login, String senha){
-        Conexao conexao = new Conexao();
-        JdbcTemplate con = conexao.getConexaoDoBanco();
+    public List<Computador> autenticadorComputador(String login, String senha, String banco){
+        JdbcTemplate con;
+        if(banco.equalsIgnoreCase("sqlserver")){
+            con = ConexaoSqlServer.conexaoSqlServer;
+        } else {
+            Conexao conexao = new Conexao();
+            con = conexao.getConexaoDoBanco();
+        }
 
         List<Computador> computadores = con.query(
             "SELECT * FROM computador WHERE login = '%s' AND senha = '%s'".formatted(login, senha),

@@ -19,24 +19,26 @@ public class DiscoRigido {
     }
 
     public List<Double> buscarTotalDeEspaco(){
-        DiscoGrupo grupoDeDiscos = new DiscoGrupo();
-        List<Volume> listaDeVolumes = grupoDeDiscos.getVolumes();
-        for(Volume volume : listaDeVolumes){
-            totalDeEspacoNosDiscos.add(volume.getTotal()/(Math.pow(1024.0, 3)));
+        if(totalDeEspacoNosDiscos.size() == 0){
+            DiscoGrupo grupoDeDiscos = new DiscoGrupo();
+            List<Volume> listaDeVolumes = grupoDeDiscos.getVolumes();
+            totalDeEspacoNosDiscos.add(listaDeVolumes.get(0).getTotal()/(Math.pow(1024.0, 3)));
         }
         return totalDeEspacoNosDiscos;
     }
 
     public List<Double> buscarEspacoLivre(){
+        disponivel.clear();
         DiscoGrupo grupoDeDiscos = new DiscoGrupo();
         List<Volume> listaDeVolumes = grupoDeDiscos.getVolumes();
-        for(Volume volume : listaDeVolumes){
-            disponivel.add(volume.getDisponivel()/(Math.pow(1024.0, 3)));
-        }
+
+        disponivel.add(listaDeVolumes.get(0).getDisponivel()/(Math.pow(1024.0, 3)));
+
         return disponivel;
     }
 
     public List<Double> buscarEspacoOcupado(){
+        ocupado.clear();
         for (int i = 0; i < totalDeEspacoNosDiscos.size(); i++){
             ocupado.add(totalDeEspacoNosDiscos.get(i) - disponivel.get(i));
         }

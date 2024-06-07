@@ -7,14 +7,13 @@ import repository.ConexaoSqlServer;
 
 import java.util.List;
 
-public class CpuModel extends Hardware{
-    public CpuModel(Integer id_hardware, String nome_hardware, Double capacidade_total, Double min, Double max, Integer fk_computador) {
+public class RedeModel extends Hardware{
+
+    public RedeModel(Integer id_hardware, String nome_hardware, Double capacidade_total, Double min, Double max, Integer fk_computador) {
         super(id_hardware, nome_hardware, capacidade_total, min, max, fk_computador);
     }
 
-    public CpuModel() {
-        super();
-    }
+    public RedeModel(){ super(); }
 
     @Override
     public <T> T autenticarHardware(Integer fk_computador, String banco) {
@@ -22,21 +21,21 @@ public class CpuModel extends Hardware{
         JdbcTemplate con;
         if(banco.equalsIgnoreCase("sqlserver")){
             con = ConexaoSqlServer.conexaoSqlServer;
-        }else{
+        }else {
             Conexao conexao = new Conexao();
             con = conexao.getConexaoDoBanco();
         }
 
-        List<CpuModel> cpu = con.query(
-                "SELECT * FROM hardware WHERE nome_hardware = 'cpu' AND fk_computador = %s".formatted(fk_computador),
-                new BeanPropertyRowMapper<>(CpuModel.class)
+        List<RedeModel> rede = con.query(
+                "SELECT * FROM hardware WHERE nome_hardware = 'rede' AND fk_computador = %s".formatted(fk_computador),
+                new BeanPropertyRowMapper<>(RedeModel.class)
         );
 
-        return (T) cpu;
+        return (T) rede;
     }
-
     @Override
     public void inserirHardware(Integer fkComputador, Double capacidadeTotal, String banco) {
+
         JdbcTemplate con;
         if(banco.equalsIgnoreCase("sqlserver")){
             con = ConexaoSqlServer.conexaoSqlServer;
@@ -46,8 +45,7 @@ public class CpuModel extends Hardware{
         }
         capacidadeTotal.toString().replace(',', '.');
 
-        con.execute("INSERT INTO hardware (nome_hardware, capacidade_total, fk_computador) VALUES ('cpu', %s, %s)".formatted(capacidadeTotal, fkComputador));
+        con.execute("INSERT INTO hardware (nome_hardware, capacidade_total, fk_computador) VALUES ('rede', %s, %d)".formatted(capacidadeTotal, fkComputador));
     }
-
 
 }

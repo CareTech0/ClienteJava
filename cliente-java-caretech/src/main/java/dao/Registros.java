@@ -2,10 +2,12 @@ package dao;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import repository.Conexao;
+import repository.ConexaoSqlServer;
 
 public class Registros {
     Conexao conexao = new Conexao();
-    JdbcTemplate con = conexao.getConexaoDoBanco();
+    JdbcTemplate con;
+    //JdbcTemplate conSqlServer = ConexaoSqlServer.conexaoSqlServer;
 //    public void inserirRegistros(
 //            Double usoRam,
 //            Double usoCpu,
@@ -24,22 +26,54 @@ public class Registros {
 
 
 
-    public void inserirDisco(Double usoDisco, Integer fkHardware, Integer idComputador){
+    public void inserirDisco(Double usoDisco, Integer fkHardware, String banco){
+
+        if(banco.equalsIgnoreCase("sqlserver")){
+            con = ConexaoSqlServer.conexaoSqlServer;
+        }else {
+            con = conexao.getConexaoDoBanco();
+        }
+
         String disco = usoDisco.toString().replace(',', '.');
 
         con.execute("INSERT INTO registros (uso_capacidade, fk_hardware) VALUES (%s, %d)".formatted(disco, fkHardware));
     }
 
-    public void inserirCpu(Double usoCpu, Integer fkHardware, Integer idComputador){
+    public void inserirCpu(Double usoCpu, Integer fkHardware, String banco){
+        if(banco.equalsIgnoreCase("sqlserver")){
+            con = ConexaoSqlServer.conexaoSqlServer;
+        }else {
+            con = conexao.getConexaoDoBanco();
+        }
+
         String cpu = usoCpu.toString().replace(',', '.');
 
         con.execute("INSERT INTO registros (uso_capacidade, fk_hardware) VALUES (%s, %d)".formatted(cpu, fkHardware));
     }
 
-    public void inserirRam(Double usoRam, Integer qtdDeProcessos, Integer fkHardware, Integer idComputador){
+    public void inserirRam(Double usoRam, Integer fkHardware, String banco){
+        if(banco.equalsIgnoreCase("sqlserver")){
+            con = ConexaoSqlServer.conexaoSqlServer;
+        }else{
+            con = conexao.getConexaoDoBanco();
+        }
+
         String ram = usoRam.toString().replace(',', '.');
 
-        con.execute("INSERT INTO registros (uso_capacidade, qtd_processos, fk_hardware) VALUES (%s, %d, %d)".formatted(ram, qtdDeProcessos, fkHardware));
+        con.execute("INSERT INTO registros (uso_capacidade, fk_hardware) VALUES (%s, %d)".formatted(ram, fkHardware));
+    }
+
+    public void inserirRede(Double velRede, Integer fkHardware, String banco){
+        if(banco.equalsIgnoreCase("sqlserver")){
+            con = ConexaoSqlServer.conexaoSqlServer;
+        }else{
+            con = conexao.getConexaoDoBanco();
+        }
+
+        String ram = velRede.toString().replace(',', '.');
+
+        con.execute("INSERT INTO registros (uso_capacidade, fk_hardware) VALUES (%s, %d)".formatted(ram, fkHardware));
+
     }
 
 }
