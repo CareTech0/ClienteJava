@@ -63,5 +63,18 @@ public class Registros {
         con.execute("INSERT INTO registros (uso_capacidade, fk_hardware) VALUES (%s, %d)".formatted(ram, fkHardware));
     }
 
+    public void inserirRede(Double velRede, Integer fkHardware, String banco){
+        if(banco.equalsIgnoreCase("sqlserver")){
+            con = ConexaoSqlServer.conexaoSqlServer;
+        }else{
+            con = conexao.getConexaoDoBanco();
+        }
+
+        String ram = velRede.toString().replace(',', '.');
+
+        con.execute("INSERT INTO registros (uso_capacidade, fk_hardware) VALUES (%s, %d)".formatted(ram, fkHardware));
+
+    }
+
 }
 

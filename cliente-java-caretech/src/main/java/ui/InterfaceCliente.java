@@ -9,6 +9,10 @@ import com.profesorfalken.jpowershell.PowerShell;
 import com.profesorfalken.jpowershell.PowerShellResponse;
 import dao.Registros;
 import dao.SitesBloqueados;
+import fr.bmartel.speedtest.SpeedTestReport;
+import fr.bmartel.speedtest.SpeedTestSocket;
+import fr.bmartel.speedtest.inter.ISpeedTestListener;
+import fr.bmartel.speedtest.model.SpeedTestError;
 import infraestrutura.Cpu;
 import infraestrutura.DiscoRigido;
 import infraestrutura.MemoriaRam;
@@ -37,6 +41,8 @@ public class InterfaceCliente {
         DiscoModel discoModel = new DiscoModel();
         DiscoModel discoModelMysql = new DiscoModel();
         RamModel ramModel = new RamModel();
+        RedeModel redeModel = new RedeModel();
+        RedeModel redeModelMysql = new RedeModel();
 
         //Infraestrutura
         Cpu cpu = new Cpu();
@@ -45,6 +51,7 @@ public class InterfaceCliente {
         Looca looca = new Looca();
         Sistema sistema = looca.getSistema();
         AutomacaoDeAlertasSlack alertasSlack = new AutomacaoDeAlertasSlack();
+        RedeLocal rede = new RedeLocal();
 
         //Dao
         Registros registros = new Registros();
@@ -74,10 +81,31 @@ public class InterfaceCliente {
                 List<RamModel> ramdb = ramModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
                 List<DiscoModel> discosdb = discoModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
                 List<CpuModel> cpudb = cpuModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
+                List<RedeModel> rededb = redeModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
                 //Models mysql
                 List<RamModel> ramMysql = ramModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
                 List<CpuModel> cpuMysql = cpuModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
                 List<DiscoModel> discoMysql = discoModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
+                List<RedeModel> redeMysql = redeModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
+
+                if(rededb.isEmpty()){
+                    redeModel.inserirHardware(computadorSqlServer.getId_Computador(), 0.0, "sqlserver");
+                    redeModel.inserirHardware(computadorMySql.getId_Computador(), 0.0, "mysql");
+                    rededb = redeModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
+                    redeMysql = redeModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
+                    System.out.println("Rede inserida com sucesso");
+                }
+
+                redeModelMysql.setId_hardware(redeMysql.get(0).getId_hardware());
+                redeModelMysql.setNome_hardware(redeMysql.get(0).getNome_hardware());
+                redeModelMysql.setCapacidade_total(redeMysql.get(0).getCapacidade_total());
+                redeModelMysql.setFk_computador(redeMysql.get(0).getFk_computador());
+
+                redeModel.setId_hardware(rededb.get(0).getId_hardware());
+                redeModel.setNome_hardware(rededb.get(0).getNome_hardware());
+                redeModel.setCapacidade_total(rededb.get(0).getCapacidade_total());
+                redeModel.setFk_computador(rededb.get(0).getFk_computador());
+
 
                 if (ramdb.isEmpty()) {
                     ramModel.inserirHardware(computadorSqlServer.getId_Computador(), ram.buscarTotalDeRam(), "sqlserver");
@@ -195,6 +223,43 @@ public class InterfaceCliente {
                 registros.inserirRam(usoRam, ramModelMysql.getId_hardware(),
                         "mysql");
 
+                // Crie um objeto SpeedTestSocket
+                SpeedTestSocket speedTestSocket = new SpeedTestSocket();
+
+                // Variável para armazenar a velocidade de download em Mbps
+                double downloadSpeedMbps = 0;
+
+                // Adicione um listener para capturar eventos de teste de velocidade
+                speedTestSocket.addSpeedTestListener(new ISpeedTestListener() {
+
+                    @Override
+                    public void onCompletion(SpeedTestReport report) {
+                        // Quando o teste for concluído, obtenha a velocidade de download em bits/s
+                        double downloadSpeed = report.getTransferRateBit().doubleValue();
+
+                        // Converta a velocidade de bits por segundo para megabits por segundo (Mbps)
+                        double downloadSpeedMbps = downloadSpeed / 1_000_000.0;
+                        registros.inserirRede(downloadSpeedMbps, redeModelMysql.getId_hardware(), "mysql");
+                        registros.inserirRede(downloadSpeedMbps, redeModel.getId_hardware(), "sqlserver");
+                        //System.out.println(downloadSpeedMbps);
+                    }
+
+                    @Override
+                    public void onError(SpeedTestError speedTestError, String errorMessage) {
+                        System.err.println("Erro: " + errorMessage);
+                    }
+
+                    @Override
+                    public void onProgress(float percent, SpeedTestReport report) {
+                        // Progresso do teste de velocidade (opcional)
+                    }
+                });
+
+                // Inicie o teste de download com um arquivo de teste
+                String fileUrl = "https://link.testfile.org/PDF10MB"; // URL do arquivo de teste
+                int timeout = 10000; // Tempo limite de conexão em milissegundos
+                speedTestSocket.startDownload(fileUrl, timeout);
+
                 System.out.println("Registros inseridos localmente com sucesso.");
 
                 registros.inserirCpu(usoCpu, cpuModel.getId_hardware(), "sqlserver");
@@ -207,8 +272,6 @@ public class InterfaceCliente {
                 }
 
                 System.out.println("Registros inseridos na nuvem com sucesso");
-                RedeLocal rede = new RedeLocal();
-                rede.buscarVelocidadeRede();
 
                 long currentTime = System.currentTimeMillis();
                 long diffMinutes = (currentTime - ultimoEnvioSlack) / (60 * 1000);

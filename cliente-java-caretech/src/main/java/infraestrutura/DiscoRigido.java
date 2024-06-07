@@ -22,9 +22,7 @@ public class DiscoRigido {
         if(totalDeEspacoNosDiscos.size() == 0){
             DiscoGrupo grupoDeDiscos = new DiscoGrupo();
             List<Volume> listaDeVolumes = grupoDeDiscos.getVolumes();
-            for(Volume volume : listaDeVolumes){
-                totalDeEspacoNosDiscos.add(volume.getTotal()/(Math.pow(1024.0, 3)));
-            }
+            totalDeEspacoNosDiscos.add(listaDeVolumes.get(0).getTotal()/(Math.pow(1024.0, 3)));
         }
         return totalDeEspacoNosDiscos;
     }
@@ -33,9 +31,9 @@ public class DiscoRigido {
         disponivel.clear();
         DiscoGrupo grupoDeDiscos = new DiscoGrupo();
         List<Volume> listaDeVolumes = grupoDeDiscos.getVolumes();
-        for(Volume volume : listaDeVolumes){
-            disponivel.add(volume.getDisponivel()/(Math.pow(1024.0, 3)));
-        }
+
+        disponivel.add(listaDeVolumes.get(0).getDisponivel()/(Math.pow(1024.0, 3)));
+
         return disponivel;
     }
 

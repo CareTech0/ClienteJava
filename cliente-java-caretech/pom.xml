@@ -65,7 +65,19 @@
             <artifactId>mssql-jdbc</artifactId>
             <version>9.2.1.jre8</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.bertrandmartel</groupId>
+            <artifactId>speed-test-lib</artifactId>
+            <version>1.32.1</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -95,5 +107,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
