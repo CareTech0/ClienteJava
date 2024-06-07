@@ -294,7 +294,7 @@ public class InterfaceCliente {
         }
     }
 
-    private static String verificarUso(String estacao_de_trabalho, Double usoCpu, Double totalRam, Double usoRam, Double totalDisco1, List<Double> usoDisco) {
+    private static String verificarUso(String estacao_de_trabalho, Double usoCpu, Double totalRam, Double usoRam, Double totalDisco1, List<Double> usoDisco){
 
         Double porcentualUsoRam = (usoRam / totalRam) * 100;
         Double porcentualUsoDisco1 = (usoDisco.get(0) / totalDisco1) * 100;
@@ -314,7 +314,7 @@ public class InterfaceCliente {
             notificacao.append("Detalhes técnicos sobre o Hardware:\n");
         }
 
-        if (usoCpu > 10.0) {
+        if (usoCpu > 90.0) {
             notificacao.append("CPU: ")
                     .append(String.format("%.2f", usoCpu)).append("%\n");
         } else if (usoCpu > 80.0) {
@@ -322,7 +322,7 @@ public class InterfaceCliente {
                     .append(String.format("%.2f", usoCpu)).append("%\n");
         }
 
-        if (porcentualUsoRam > 10.0) {
+        if (porcentualUsoRam > 90.0) {
             notificacao.append("RAM: ")
                     .append(String.format("%.2f", porcentualUsoRam)).append("%\n");
         } else if (porcentualUsoRam > 80) {
@@ -330,7 +330,7 @@ public class InterfaceCliente {
                     .append(String.format("%.2f", porcentualUsoRam)).append("%\n");
         }
 
-        if (porcentualUsoDisco1 > 10.0) {
+        if (porcentualUsoDisco1 > 90.0) {
             notificacao.append("Disco: ")
                     .append(String.format("%.2f", porcentualUsoDisco1)).append("%\n");
         } else if (porcentualUsoDisco1 > 80) {
