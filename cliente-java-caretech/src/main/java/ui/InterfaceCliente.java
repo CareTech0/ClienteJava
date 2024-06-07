@@ -75,6 +75,7 @@ public class InterfaceCliente {
 
                 sitesBloqueados.setFkEmpresa(computadores.get(0).getFk_empresa());
                 computadorSqlServer.setId_Computador(computadores.get(0).getId_Computador());
+                computadorSqlServer.setEstacao_de_trabalho(computadores.get(0).getEstacao_de_trabalho());
                 computadorMySql.setId_Computador(computadoresMySql.get(0).getId_Computador());
 
                 //Models SQL server
@@ -277,7 +278,9 @@ public class InterfaceCliente {
                 long diffMinutes = (currentTime - ultimoEnvioSlack) / (60 * 1000);
 
                 if (diffMinutes >= 10) {
-                    String alertaMessage = verificarUso(usoCpu, usoRam, totalRam, totalDisco1, usoSsd);
+
+
+                    String alertaMessage = verificarUso(computadorSqlServer.getEstacao_de_trabalho(),usoCpu, totalRam, usoRam, totalDisco1, usoSsd);
                     if (alertaMessage != null) {
                         alertasSlack.enviarAlertaSlack(alertaMessage);
                     }
@@ -291,45 +294,47 @@ public class InterfaceCliente {
         }
     }
 
-    private static String verificarUso(Double usoCpu, Double totalRam, Double usoRam, Double totalDisco1, List<Double> usoDisco) {
-        // Verificar se os valores de total não são zero para evitar divisão por zero
-        if (totalRam == 0 || totalDisco1 == 0) {
-            return "Erro: Total de RAM ou Disco não pode ser zero.";
-        }
-
-        // Verificar se a lista usoDisco tem pelo menos um elemento
-        if (usoDisco == null || usoDisco.size() < 1) {
-            return "Erro: Lista usoDisco deve conter pelo menos um elemento.";
-        }
+    private static String verificarUso(String estacao_de_trabalho, Double usoCpu, Double totalRam, Double usoRam, Double totalDisco1, List<Double> usoDisco) {
 
         Double porcentualUsoRam = (usoRam / totalRam) * 100;
         Double porcentualUsoDisco1 = (usoDisco.get(0) / totalDisco1) * 100;
 
         StringBuilder notificacao = new StringBuilder();
 
-        notificacao.append("Novo alerta\n");
+        if (usoCpu > 90.0 || porcentualUsoRam > 90.0 || porcentualUsoDisco1 > 90.0 || usoCpu > 80.0 || porcentualUsoRam > 80.0 || porcentualUsoDisco1 > 80.0) {
+            notificacao.append("Novo ocorrência!\n");
+            notificacao.append("Estação de trabalho: ").append(estacao_de_trabalho).append("\n");
+        }
 
-        if (usoCpu > 80.0) {
-            notificacao.append("Estado Crítico! Uso da CPU acima de 80%: ")
+        if (usoCpu > 90.0 || porcentualUsoRam > 90.0 || porcentualUsoDisco1 > 90.0) {
+            notificacao.append("Tipo da ocorrência: Máquina em estado crítico de funcionamento\n");
+            notificacao.append("Detalhes técnicos sobre o Hardware:\n");
+        } else if (usoCpu > 80.0 || porcentualUsoRam > 80.0 || porcentualUsoDisco1 > 80.0) {
+            notificacao.append("Tipo da ocorrência: Máquina em estado de alerta\n");
+            notificacao.append("Detalhes técnicos sobre o Hardware:\n");
+        }
+
+        if (usoCpu > 10.0) {
+            notificacao.append("CPU: ")
                     .append(String.format("%.2f", usoCpu)).append("%\n");
-        } else if (usoCpu > 60) {
-            notificacao.append("Cuidado! Uso da CPU acima de 60%: ")
+        } else if (usoCpu > 80.0) {
+            notificacao.append("CPU: ")
                     .append(String.format("%.2f", usoCpu)).append("%\n");
         }
 
-        if (porcentualUsoRam > 80.0) {
-            notificacao.append("Estado Crítico! RAM utilizada: ")
+        if (porcentualUsoRam > 10.0) {
+            notificacao.append("RAM: ")
                     .append(String.format("%.2f", porcentualUsoRam)).append("%\n");
-        } else if (porcentualUsoRam > 70) {
-            notificacao.append("Cuidado! RAM utilizada: ")
+        } else if (porcentualUsoRam > 80) {
+            notificacao.append("RAM: ")
                     .append(String.format("%.2f", porcentualUsoRam)).append("%\n");
         }
 
-        if (porcentualUsoDisco1 > 80.0) {
-            notificacao.append("Estado Crítico! Espaço consumido no Disco 1: ")
+        if (porcentualUsoDisco1 > 10.0) {
+            notificacao.append("Disco: ")
                     .append(String.format("%.2f", porcentualUsoDisco1)).append("%\n");
-        } else if (porcentualUsoDisco1 > 70) {
-            notificacao.append("Cuidado! Espaço consumido no Disco 1: ")
+        } else if (porcentualUsoDisco1 > 80) {
+            notificacao.append("Disco: ")
                     .append(String.format("%.2f", porcentualUsoDisco1)).append("%\n");
         }
 
