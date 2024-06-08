@@ -89,7 +89,7 @@ public class InterfaceCliente {
                 List<DiscoModel> discoMysql = discoModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
                 List<RedeModel> redeMysql = redeModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
 
-                if(rededb.isEmpty()){
+                if (rededb.isEmpty()) {
                     redeModel.inserirHardware(computadorSqlServer.getId_Computador(), 0.0, "sqlserver");
                     redeModel.inserirHardware(computadorMySql.getId_Computador(), 0.0, "mysql");
                     rededb = redeModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
@@ -138,7 +138,6 @@ public class InterfaceCliente {
                 }
 
                 for (Hardware discoFor : discoMysql) {
-
                     discoModelMysql.setId_hardware(discoFor.getId_hardware());
                     discoModelMysql.setCapacidade_total(discoFor.getCapacidade_total());
                     discoModelMysql.setNome_hardware(discoFor.getNome_hardware());
@@ -147,7 +146,6 @@ public class InterfaceCliente {
                 }
 
                 for (Hardware discoFor : discosdb) {
-
                     discoModel.setId_hardware(discoFor.getId_hardware());
                     discoModel.setCapacidade_total(discoFor.getCapacidade_total());
                     discoModel.setNome_hardware(discoFor.getNome_hardware());
@@ -195,7 +193,7 @@ public class InterfaceCliente {
                 for (Janela processo : listaProcessos) {
                     for (SitesBloqueados site : listaSitesBloqueados) {
                         if (processo.getTitulo().toLowerCase().contains(site.getNome().toLowerCase())) {
-                            System.out.println("Você não tem permissão para acessar o site %s, portanto fechamos ele".formatted(site.getNome()));
+                            System.out.println("Você não tem permissão para acessar o site %s, portanto fechamos seu navegador".formatted(site.getNome()));
                             Long pidProcesso = processo.getPid();
                             PowerShellResponse response;
                             if (sistema.getSistemaOperacional().equalsIgnoreCase("Windows")) {
@@ -203,6 +201,8 @@ public class InterfaceCliente {
                             } else {
                                 response = PowerShell.executeSingleCommand("kill %d".formatted(pidProcesso));
                             }
+                            String mensagem = "Nova ocorrência\nEstação de trabalho: " + computadorSqlServer.getEstacao_de_trabalho()+ "\nTipo da ocorrência: Acesso a site bloqueado\n Site acessado: " + site.getUrl();
+                            alertasSlack.enviarAlertaSlack(mensagem);
                             break;
                         }
                     }
@@ -215,8 +215,7 @@ public class InterfaceCliente {
                 List<Double> usoSsd = ssd.buscarEspacoOcupado();
 
 
-
-                for(int i = 0; i < computadorMySql.getListaDiscos().size(); i++){
+                for (int i = 0; i < computadorMySql.getListaDiscos().size(); i++) {
                     registros.inserirDisco(usoSsd.get(i), computadorMySql.getListaDiscos().get(i).getId_hardware(),
                             "mysql");
                 }
@@ -280,7 +279,7 @@ public class InterfaceCliente {
                 if (diffMinutes >= 10) {
 
 
-                    String alertaMessage = verificarUso(computadorSqlServer.getEstacao_de_trabalho(),usoCpu, totalRam, usoRam, totalDisco1, usoSsd);
+                    String alertaMessage = verificarUso(computadorSqlServer.getEstacao_de_trabalho(), usoCpu, totalRam, usoRam, totalDisco1, usoSsd);
                     if (alertaMessage != null) {
                         alertasSlack.enviarAlertaSlack(alertaMessage);
                     }
@@ -294,7 +293,7 @@ public class InterfaceCliente {
         }
     }
 
-    private static String verificarUso(String estacao_de_trabalho, Double usoCpu, Double totalRam, Double usoRam, Double totalDisco1, List<Double> usoDisco){
+    private static String verificarUso(String estacao_de_trabalho, Double usoCpu, Double totalRam, Double usoRam, Double totalDisco1, List<Double> usoDisco) {
 
         Double porcentualUsoRam = (usoRam / totalRam) * 100;
         Double porcentualUsoDisco1 = (usoDisco.get(0) / totalDisco1) * 100;
