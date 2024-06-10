@@ -1,10 +1,17 @@
-# Etapa 2: Execução
-FROM eclipse-temurin:17.0.10_7-jre
+FROM maven:3.8.5-eclipse-temurin-17 AS build
+WORKDIR /app
+
+COPY pom.xml .
+
+RUN mvn dependency:go-offline
+
+COPY . .
+RUN mvn clean install
+
+FROM openjdk:23-ea-17-jdk-oraclelinux9
 
 WORKDIR /app
 
-# Copie o jar construído da fase de build
-COPY ./target/cliente-java-caretech-1.0-SNAPSHOT-jar-with-dependencies.jar ./my-app.jar
+COPY --from=build /app/target/cliente-java-caretech-1.0-SNAPSHOT-jar-with-dependencies.jar .
 
-# Comando para executar a aplicação
-ENTRYPOINT ["java", "-jar", "my-app.jar"]
+ENTRYPOINT ["java", "-jar", "cliente-java-caretech-1.0-SNAPSHOT-jar-with-dependencies.jar"]
