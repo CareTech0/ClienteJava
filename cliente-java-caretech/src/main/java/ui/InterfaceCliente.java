@@ -17,6 +17,7 @@ import infraestrutura.Cpu;
 import infraestrutura.DiscoRigido;
 import infraestrutura.MemoriaRam;
 import infraestrutura.RedeLocal;
+import logs.Logger;
 import model.*;
 import notificacoes.AutomacaoDeAlertasSlack;
 import repository.ConexaoSqlServer;
@@ -29,14 +30,17 @@ public class InterfaceCliente {
     private static long ultimoEnvioSlack = 0;
 
     public static void main(String[] args) {
-        try{
+        try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } catch (ClassNotFoundException e){
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
             return;
         }
         String statusDaVerificacao = "";
         SitesBloqueados sitesBloqueados = new SitesBloqueados();
+        Logger loggerAvisos = new Logger("logs/Avisos da Aplicação");
+        Logger loggerAlertas = new Logger("logs/Alertas de Captura");
+        Logger loggerMonitoramento = new Logger("logs/Monitoramento do Dispositivo");
 
         //Models
         Computador computadorSqlServer = new Computador();
@@ -77,8 +81,16 @@ public class InterfaceCliente {
             List<Computador> computadores = computadorSqlServer.autenticadorComputador(user, senha, "SqlServer");
             if (computadores.size() == 1) {
                 statusDaVerificacao = "Login Realizado com Sucesso!!!";
+
+                loggerAvisos.gerarLog("✅ Aplicação Iniciada ✅");
+                loggerAlertas.gerarLog("✅ Aplicação Iniciada ✅");
+                loggerMonitoramento.gerarLog("✅ Aplicação Iniciada ✅");
+                loggerAvisos.gerarLog(String.format("✅ Usuário %s fez login no sistema com a senha %s.", user, senha));
+                loggerAlertas.gerarLog(String.format("✅ Usuário %s fez login no sistema com a senha %s.", user, senha));
+                loggerMonitoramento.gerarLog(String.format("✅ Usuário %s fez login no sistema com a senha %s.", user, senha));
+
                 List<Computador> computadoresMySql = computadorMySql.autenticadorComputador(user, senha, "mysql");
-                if(computadoresMySql.size()<1){
+                if (computadoresMySql.size() < 1) {
                     registros.inserirComputador(user, senha, "mysql");
                     computadoresMySql = computadorMySql.autenticadorComputador(user, senha, "mysql");
                 }
@@ -182,6 +194,9 @@ public class InterfaceCliente {
 
             } else {
                 statusDaVerificacao = "Login ou senha inválidos!!!";
+                loggerAvisos.gerarLog("❌ Erro ao acessar: login ou senha inválidos! ❌");
+                loggerAlertas.gerarLog("❌ Erro ao acessar: login ou senha inválidos! ❌");
+                loggerMonitoramento.gerarLog("❌ Erro ao acessar: login ou senha inválidos! ❌");
             }
 
             System.out.println(statusDaVerificacao);
@@ -191,6 +206,10 @@ public class InterfaceCliente {
             System.out.println("Velocidade de rede: ");
 
             System.out.println("Sistema operacional: " + sistema.getSistemaOperacional());
+
+            loggerAvisos.gerarLog(String.format("🖥️ Sistema operacional utilizado para captura: %s", sistema.getSistemaOperacional()));
+            loggerAlertas.gerarLog(String.format("🖥️ Sistema operacional utilizado para captura: %s", sistema.getSistemaOperacional()));
+            loggerMonitoramento.gerarLog(String.format("🖥️ Sistema operacional utilizado para captura: %s", sistema.getSistemaOperacional()));
             while (true) {
                 ssd.buscarTotalDeEspaco();
                 ssd.buscarEspacoLivre();
@@ -203,6 +222,7 @@ public class InterfaceCliente {
                     for (SitesBloqueados site : listaSitesBloqueados) {
                         if (processo.getTitulo().toLowerCase().contains(site.getNome().toLowerCase())) {
                             System.out.println("Você não tem permissão para acessar o site %s, portanto fechamos seu navegador".formatted(site.getNome()));
+                            loggerAvisos.gerarLog(String.format("🚫 Site bloqueado acessado: %s. Processo encerrado.", site.getNome()));
                             Long pidProcesso = processo.getPid();
                             PowerShellResponse response;
                             if (sistema.getSistemaOperacional().equalsIgnoreCase("Windows")) {
@@ -210,7 +230,7 @@ public class InterfaceCliente {
                             } else {
                                 response = PowerShell.executeSingleCommand("kill %d".formatted(pidProcesso));
                             }
-                            String mensagem = "Nova ocorrência\nEstação de trabalho: " + computadorSqlServer.getEstacao_de_trabalho()+ "\nTipo da ocorrência: Acesso a site bloqueado\n Site acessado: " + site.getUrl();
+                            String mensagem = "Nova ocorrência\nEstação de trabalho: " + computadorSqlServer.getEstacao_de_trabalho() + "\nTipo da ocorrência: Acesso a site bloqueado\n Site acessado: " + site.getUrl();
                             alertasSlack.enviarAlertaSlack(mensagem);
                             break;
                         }
@@ -282,13 +302,15 @@ public class InterfaceCliente {
 
                 System.out.println("Registros inseridos na nuvem com sucesso");
 
+                logarUsoRecursos(usoCpu, usoRam, totalRam, totalDisco1, usoSsd, loggerMonitoramento);
+
                 long currentTime = System.currentTimeMillis();
                 long diffMinutes = (currentTime - ultimoEnvioSlack) / (60 * 1000);
 
                 if (diffMinutes >= 10) {
 
 
-                    String alertaMessage = verificarUso(computadorSqlServer.getEstacao_de_trabalho(), usoCpu, totalRam, usoRam, totalDisco1, usoSsd);
+                    String alertaMessage = verificarUso(computadorSqlServer.getEstacao_de_trabalho(), usoCpu, totalRam, usoRam, totalDisco1, usoSsd, loggerAvisos, loggerAlertas);
                     if (alertaMessage != null) {
                         alertasSlack.enviarAlertaSlack(alertaMessage);
                     }
@@ -302,7 +324,14 @@ public class InterfaceCliente {
         }
     }
 
-    private static String verificarUso(String estacao_de_trabalho, Double usoCpu, Double totalRam, Double usoRam, Double totalDisco1, List<Double> usoDisco) {
+    private static void logarUsoRecursos(Double usoCpu, Double usoRam, Double totalRam, Double totalDisco1, List<Double> usoDisco, Logger loggerMonitoramento) {
+        loggerMonitoramento.gerarLog(String.format("🔔 Uso da CPU: %.2f%%", usoCpu));
+        loggerMonitoramento.gerarLog(String.format("🔔 Uso da RAM: %.2f%% de %.2f GB", usoRam, totalRam));
+        loggerMonitoramento.gerarLog(String.format("🔔 Uso do Disco 1: %.2f%% de %.2f GB", usoDisco.get(0), totalDisco1));
+        loggerMonitoramento.gerarLog("");
+    }
+
+    private static String verificarUso(String estacao_de_trabalho, Double usoCpu, Double totalRam, Double usoRam, Double totalDisco1, List<Double> usoDisco, Logger loggerAvisos, Logger loggerAlertas) {
 
         Double porcentualUsoRam = (usoRam / totalRam) * 100;
         Double porcentualUsoDisco1 = (usoDisco.get(0) / totalDisco1) * 100;
@@ -317,33 +346,41 @@ public class InterfaceCliente {
         if (usoCpu > 90.0 || porcentualUsoRam > 90.0 || porcentualUsoDisco1 > 90.0) {
             notificacao.append("Tipo da ocorrência: Máquina em estado crítico de funcionamento\n");
             notificacao.append("Detalhes técnicos sobre o Hardware:\n");
+            loggerAvisos.gerarLog("‼️ Nova ocorrência: Máquina em estado crítico de funcionamento\n");
         } else if (usoCpu > 80.0 || porcentualUsoRam > 80.0 || porcentualUsoDisco1 > 80.0) {
             notificacao.append("Tipo da ocorrência: Máquina em estado de alerta\n");
             notificacao.append("Detalhes técnicos sobre o Hardware:\n");
+            loggerAvisos.gerarLog("️❗ Nova ocorrência: Máquina em estado de alerta\n");
         }
 
         if (usoCpu > 90.0) {
             notificacao.append("CPU: ")
                     .append(String.format("%.2f", usoCpu)).append("%\n");
+            loggerAlertas.gerarLog("⚠️ Uso da CPU acima de 90%: %.2f".formatted(usoCpu));
         } else if (usoCpu > 80.0) {
             notificacao.append("CPU: ")
                     .append(String.format("%.2f", usoCpu)).append("%\n");
+            loggerAlertas.gerarLog("⚠️ Uso da CPU acima de 80%: %.2f".formatted(usoCpu));
         }
 
         if (porcentualUsoRam > 90.0) {
             notificacao.append("RAM: ")
                     .append(String.format("%.2f", porcentualUsoRam)).append("%\n");
+            loggerAlertas.gerarLog("⚠️ Cuidado! RAM utilizada: %.2f".formatted(porcentualUsoRam));
         } else if (porcentualUsoRam > 80) {
             notificacao.append("RAM: ")
                     .append(String.format("%.2f", porcentualUsoRam)).append("%\n");
+            loggerAlertas.gerarLog("⚠️ RAM utilizada: %.2f".formatted(porcentualUsoRam));
         }
 
         if (porcentualUsoDisco1 > 90.0) {
             notificacao.append("Disco: ")
                     .append(String.format("%.2f", porcentualUsoDisco1)).append("%\n");
+            loggerAlertas.gerarLog("⚠️ Alerta! Espaço consumido no Disco: %.2f".formatted(porcentualUsoDisco1));
         } else if (porcentualUsoDisco1 > 80) {
             notificacao.append("Disco: ")
                     .append(String.format("%.2f", porcentualUsoDisco1)).append("%\n");
+            loggerAlertas.gerarLog("⚠️ Espaço consumido no Disco: %.2f".formatted(porcentualUsoDisco1));
         }
 
         if (notificacao.isEmpty()) {
