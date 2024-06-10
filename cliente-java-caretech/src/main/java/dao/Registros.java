@@ -76,5 +76,16 @@ public class Registros {
 
     }
 
+    public void inserirComputador(String user, String senha, String banco){
+
+        if(banco.equalsIgnoreCase("sqlserver")){
+            con = ConexaoSqlServer.conexaoSqlServer;
+        }else {
+            con = conexao.getConexaoDoBanco();
+        }
+
+        con.execute("INSERT INTO computador (estacao_de_trabalho, login, senha, fk_empresa) VALUES ('Estação de contingência', '%s', '%s', 1);".formatted(user, senha));
+    }
+
 }
 

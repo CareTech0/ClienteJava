@@ -29,6 +29,12 @@ public class InterfaceCliente {
     private static long ultimoEnvioSlack = 0;
 
     public static void main(String[] args) {
+        try{
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e){
+            e.printStackTrace();
+            return;
+        }
         String statusDaVerificacao = "";
         SitesBloqueados sitesBloqueados = new SitesBloqueados();
 
@@ -69,10 +75,13 @@ public class InterfaceCliente {
             System.out.println("Senha: ");
             String senha = input.nextLine();
             List<Computador> computadores = computadorSqlServer.autenticadorComputador(user, senha, "SqlServer");
-            List<Computador> computadoresMySql = computadorMySql.autenticadorComputador(user, senha, "mysql");
             if (computadores.size() == 1) {
                 statusDaVerificacao = "Login Realizado com Sucesso!!!";
-
+                List<Computador> computadoresMySql = computadorMySql.autenticadorComputador(user, senha, "mysql");
+                if(computadoresMySql.size()<1){
+                    registros.inserirComputador(user, senha, "mysql");
+                    computadoresMySql = computadorMySql.autenticadorComputador(user, senha, "mysql");
+                }
                 sitesBloqueados.setFkEmpresa(computadores.get(0).getFk_empresa());
                 computadorSqlServer.setId_Computador(computadores.get(0).getId_Computador());
                 computadorMySql.setId_Computador(computadoresMySql.get(0).getId_Computador());
