@@ -100,10 +100,14 @@ public class InterfaceCliente {
 
                 if (rededb.isEmpty()) {
                     redeModel.inserirHardware(computadorSqlServer.getId_Computador(), 0.0, "sqlserver");
-                    redeModel.inserirHardware(computadorMySql.getId_Computador(), 0.0, "mysql");
                     rededb = redeModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
-                    redeMysql = redeModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
                     System.out.println("Rede inserida com sucesso");
+                }
+
+                if(redeMysql.isEmpty()){
+                    redeModel.inserirHardware(computadorMySql.getId_Computador(), 0.0, "mysql");
+                    redeMysql = redeModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
+
                 }
 
                 redeModelMysql.setId_hardware(redeMysql.get(0).getId_hardware());
@@ -119,9 +123,12 @@ public class InterfaceCliente {
 
                 if (ramdb.isEmpty()) {
                     ramModel.inserirHardware(computadorSqlServer.getId_Computador(), ram.buscarTotalDeRam(), "sqlserver");
+                    ramdb = ramModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
+                }
+
+                if(ramMysql.isEmpty()){
                     ramModel.inserirHardware(computadorMySql.getId_Computador(), ram.buscarTotalDeRam(), "mysql");
                     ramMysql = ramModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
-                    ramdb = ramModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
                 }
 
                 //Adicionando os atibutos ao objeto atrelado ao banco MySQL
@@ -137,13 +144,14 @@ public class InterfaceCliente {
                 ramModel.setFk_computador(ramdb.get(0).getFk_computador());
 
                 if (discosdb.isEmpty()) {
-                    for (Double ssdFor : ssd.buscarTotalDeEspaco()) {
-                        discoModel.inserirHardware(computadorSqlServer.getId_Computador(), ssdFor, "sqlserver");
-                        discoModel.inserirHardware(computadorMySql.getId_Computador(), ssdFor, "mysql");
-                    }
-
-                    discoMysql = discoModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
+                    discoModel.inserirHardware(computadorSqlServer.getId_Computador(), ssd.buscarTotalDeEspaco().get(0), "sqlserver");
                     discosdb = discoModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
+                }
+
+                if(discoMysql.isEmpty()){
+                    discoModel.inserirHardware(computadorMySql.getId_Computador(), ssd.buscarTotalDeEspaco().get(0), "mysql");
+                    discoMysql = discoModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
+
                 }
 
                 for (Hardware discoFor : discoMysql) {
@@ -165,9 +173,12 @@ public class InterfaceCliente {
 
                 if (cpudb.isEmpty()) {
                     cpuModel.inserirHardware(computadorSqlServer.getId_Computador(), cpu.buscarUsoCpu(), "sqlserver");
+                    cpudb = cpuModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
+                }
+
+                if(cpuMysql.isEmpty()){
                     cpuModel.inserirHardware(computadorMySql.getId_Computador(), cpu.buscarUsoCpu(), "mysql");
                     cpuMysql = cpuModelMysql.autenticarHardware(computadorMySql.getId_Computador(), "mysql");
-                    cpudb = cpuModel.autenticarHardware(computadorSqlServer.getId_Computador(), "sqlserver");
                 }
 
                 cpuModelMysql.setId_hardware(cpuMysql.get(0).getId_hardware());
@@ -224,10 +235,10 @@ public class InterfaceCliente {
                 List<Double> usoSsd = ssd.buscarEspacoOcupado();
 
 
-                for (int i = 0; i < computadorMySql.getListaDiscos().size(); i++) {
-                    registros.inserirDisco(usoSsd.get(i), computadorMySql.getListaDiscos().get(i).getId_hardware(),
+
+                registros.inserirDisco(usoSsd.get(0), computadorMySql.getListaDiscos().get(0).getId_hardware(),
                             "mysql");
-                }
+
                 registros.inserirCpu(usoCpu, cpuModelMysql.getId_hardware(), "mysql");
                 registros.inserirRam(usoRam, ramModelMysql.getId_hardware(),
                         "mysql");
