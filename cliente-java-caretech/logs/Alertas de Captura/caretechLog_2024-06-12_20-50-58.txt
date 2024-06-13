@@ -1,0 +1,4 @@
+12/06/2024 20:51:14 - ✅ Aplicação Iniciada ✅
+12/06/2024 20:51:14 - ✅ Usuário munari_user fez login no sistema com a senha munari_password.
+12/06/2024 20:51:16 - 🖥️ Sistema operacional utilizado para captura: Windows
+12/06/2024 20:51:21 - ⚠️ RAM utilizada: 84,41

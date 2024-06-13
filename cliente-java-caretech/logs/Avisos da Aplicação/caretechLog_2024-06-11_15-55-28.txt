@@ -1,0 +1,7 @@
+11/06/2024 16:00:00 - ✅ Aplicação Iniciada ✅
+11/06/2024 16:00:00 - ✅ Usuário ian_user fez login no sistema com a senha ian_password.
+11/06/2024 16:00:03 - 🖥️ Sistema operacional utilizado para captura: Windows
+11/06/2024 16:00:03 - 🚫 Site bloqueado acessado: Youtube. Processo encerrado.
+11/06/2024 16:00:17 - ️❗ Nova ocorrência: Máquina em estado de alerta
+
+11/06/2024 16:03:46 - 🚫 Site bloqueado acessado: Youtube. Processo encerrado.

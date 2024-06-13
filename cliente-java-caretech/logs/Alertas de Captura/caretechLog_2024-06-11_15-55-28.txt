@@ -1,0 +1,4 @@
+11/06/2024 16:00:00 - ✅ Aplicação Iniciada ✅
+11/06/2024 16:00:00 - ✅ Usuário ian_user fez login no sistema com a senha ian_password.
+11/06/2024 16:00:03 - 🖥️ Sistema operacional utilizado para captura: Windows
+11/06/2024 16:00:17 - ⚠️ RAM utilizada: 89,59

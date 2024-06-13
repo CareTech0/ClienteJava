@@ -1,0 +1,11 @@
+12/06/2024 20:59:25 - ✅ Aplicação Iniciada ✅
+12/06/2024 20:59:25 - ✅ Usuário munari_user fez login no sistema com a senha munari_password.
+12/06/2024 20:59:27 - 🖥️ Sistema operacional utilizado para captura: Windows
+12/06/2024 20:59:31 - 🔔 Uso da CPU: 6,66%
+12/06/2024 20:59:31 - 🔔 Uso da RAM: 10,25% de 11,79 GB
+12/06/2024 20:59:31 - 🔔 Uso do Disco 1: 137,63% de 236,25 GB
+12/06/2024 20:59:31 - 
+12/06/2024 20:59:38 - 🔔 Uso da CPU: 5,04%
+12/06/2024 20:59:38 - 🔔 Uso da RAM: 10,19% de 11,79 GB
+12/06/2024 20:59:38 - 🔔 Uso do Disco 1: 137,63% de 236,25 GB
+12/06/2024 20:59:38 - 

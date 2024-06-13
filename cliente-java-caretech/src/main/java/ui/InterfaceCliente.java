@@ -21,6 +21,7 @@ import logs.Logger;
 import model.*;
 import notificacoes.AutomacaoDeAlertasSlack;
 import repository.ConexaoSqlServer;
+import threads.BloquearSites;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -97,6 +98,7 @@ public class InterfaceCliente {
                 sitesBloqueados.setFkEmpresa(computadores.get(0).getFk_empresa());
                 computadorSqlServer.setId_Computador(computadores.get(0).getId_Computador());
                 computadorSqlServer.setEstacao_de_trabalho(computadores.get(0).getEstacao_de_trabalho());
+                computadorSqlServer.setFk_empresa(computadores.get(0).getFk_empresa());
                 computadorMySql.setId_Computador(computadoresMySql.get(0).getId_Computador());
 
                 //Models SQL server
@@ -214,39 +216,20 @@ public class InterfaceCliente {
         } while (!statusDaVerificacao.equals("Login Realizado com Sucesso!!!"));
 
         try {
-            System.out.println("Velocidade de rede: ");
 
             System.out.println("Sistema operacional: " + sistema.getSistemaOperacional());
 
             loggerAvisos.gerarLog(String.format("🖥️ Sistema operacional utilizado para captura: %s", sistema.getSistemaOperacional()));
             loggerAlertas.gerarLog(String.format("🖥️ Sistema operacional utilizado para captura: %s", sistema.getSistemaOperacional()));
             loggerMonitoramento.gerarLog(String.format("🖥️ Sistema operacional utilizado para captura: %s", sistema.getSistemaOperacional()));
+
+            BloquearSites bloqueioDeSites = new BloquearSites();
+            bloqueioDeSites.setEstacaoDeTrabalho(computadorSqlServer.getEstacao_de_trabalho());
+            bloqueioDeSites.setFkEmpresa(computadorSqlServer.getFk_empresa());
+            bloqueioDeSites.start();
             while (true) {
                 ssd.buscarTotalDeEspaco();
                 ssd.buscarEspacoLivre();
-
-                List<Janela> listaProcessos = ram.buscarProcessos();
-                List<SitesBloqueados> listaSitesBloqueados = sitesBloqueados.getSitesBloqueados();
-
-                // Thread de fechar  sites bloqueados
-                for (Janela processo : listaProcessos) {
-                    for (SitesBloqueados site : listaSitesBloqueados) {
-                        if (processo.getTitulo().toLowerCase().contains(site.getNome().toLowerCase())) {
-                            System.out.println("Você não tem permissão para acessar o site %s, portanto fechamos seu navegador".formatted(site.getNome()));
-                            loggerAvisos.gerarLog(String.format("🚫 Site bloqueado acessado: %s. Processo encerrado.", site.getNome()));
-                            Long pidProcesso = processo.getPid();
-                            PowerShellResponse response;
-                            if (sistema.getSistemaOperacional().equalsIgnoreCase("Windows")) {
-                                response = PowerShell.executeSingleCommand("taskkill /PID %d".formatted(pidProcesso));
-                            } else {
-                                response = PowerShell.executeSingleCommand("kill %d".formatted(pidProcesso));
-                            }
-                            String mensagem = "Nova ocorrência\nEstação de trabalho: " + computadorSqlServer.getEstacao_de_trabalho() + "\nTipo da ocorrência: Acesso a site bloqueado\n Site acessado: " + site.getUrl();
-                            alertasSlack.enviarAlertaSlack(mensagem);
-                            break;
-                        }
-                    }
-                }
 
                 Double usoRam = ram.buscarUsoDeRam();
                 Double totalRam = ram.buscarTotalDeRam();
