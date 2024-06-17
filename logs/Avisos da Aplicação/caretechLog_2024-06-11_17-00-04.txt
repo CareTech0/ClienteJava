@@ -1,0 +1,7 @@
+11/06/2024 17:00:33 - ✅ Aplicação Iniciada ✅
+11/06/2024 17:00:33 - ✅ Usuário henrique_user fez login no sistema com a senha henrique_p.
+11/06/2024 17:01:03 - 🖥️ Sistema operacional utilizado para captura: Windows
+11/06/2024 17:01:09 - ️❗ Nova ocorrência: Máquina em estado de alerta
+
+11/06/2024 17:11:13 - ️❗ Nova ocorrência: Máquina em estado de alerta
+

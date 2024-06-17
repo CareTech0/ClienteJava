@@ -2,7 +2,7 @@ package dao;
 
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import repository.Conexao;
+import repository.ConexaoSqlServer;
 
 import java.util.List;
 
@@ -17,8 +17,8 @@ public class SitesBloqueados {
     }
 
     public List<SitesBloqueados> getSitesBloqueados(){
-        Conexao conexao = new Conexao();
-        JdbcTemplate con = conexao.getConexaoDoBanco();
+
+        JdbcTemplate con = ConexaoSqlServer.conexaoSqlServer;
 
         List<SitesBloqueados> sitesBloqueados = con.query(
                 "SELECT * FROM sites_bloqueados WHERE fk_empresa = %d".formatted(fkEmpresa),
